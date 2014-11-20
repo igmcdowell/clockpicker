@@ -117,6 +117,7 @@
 		this.spanMinutes = popover.find('.clockpicker-span-minutes');
 		this.spanAmPm = popover.find('.clockpicker-span-am-pm');
 		this.amOrPm = "PM";
+		this.immediateUpdate = false;
 		
 		// Setup for for 12 hour clock if option is selected
 		if (options.twelvehour) {
@@ -148,6 +149,7 @@
 				.on("click", function() {
 					self.amOrPm = "AM";
 					$('.clockpicker-span-am-pm').empty().append('AM');
+					if(self.options.immediateUpdate) self.updateInput();
 				}).appendTo(this.amPmBlock);
 				
 				
@@ -155,6 +157,7 @@
 				.on("click", function() {
 					self.amOrPm = 'PM';
 					$('.clockpicker-span-am-pm').empty().append('PM');
+					if(self.options.immediateUpdate) self.updateInput();
 				}).appendTo(this.amPmBlock);
 				
 		}
@@ -463,6 +466,7 @@
 			];
 		}
 		this.hours = + value[0] || 0;
+		if(value[1].match(/AM|PM/)) value[1] = value[1].substr(0,2);
 		this.minutes = + value[1] || 0;
 		this.spanHours.html(leadingZero(this.hours));
 		this.spanMinutes.html(leadingZero(this.minutes));
@@ -637,7 +641,7 @@
 
 		this[this.currentView] = value;
 		this[isHours ? 'spanHours' : 'spanMinutes'].html(leadingZero(value));
-
+		if(this.options.immediateUpdate) this.updateInput();
 		// If svg is not supported, just add an active class to the tick
 		if (! svgSupported) {
 			this[isHours ? 'hoursView' : 'minutesView'].find('.clockpicker-tick').each(function(){
@@ -670,12 +674,9 @@
 		this.fg.setAttribute('cy', cy);
 	};
 
-	// Hours and minutes are selected
-	ClockPicker.prototype.done = function() {
-		raiseCallback(this.options.beforeDone);
-		this.hide();
+	ClockPicker.prototype.updateInput = function() {
 		var last = this.input.prop('value'),
-			value = leadingZero(this.hours) + ':' + leadingZero(this.minutes);
+			  value = leadingZero(this.hours) + ':' + leadingZero(this.minutes);
 		if  (this.options.twelvehour) {
 			value = value + this.amOrPm;
 		}
@@ -687,7 +688,13 @@
 				this.element.trigger('change');
 			}
 		}
+	}
 
+	// Hours and minutes are selected
+	ClockPicker.prototype.done = function() {
+		raiseCallback(this.options.beforeDone);
+		this.hide();
+		this.updateInput();
 		if (this.options.autoclose) {
 			this.input.trigger('blur');
 		}
