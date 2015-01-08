@@ -116,7 +116,7 @@
 		this.spanHours = popover.find('.clockpicker-span-hours');
 		this.spanMinutes = popover.find('.clockpicker-span-minutes');
 		this.spanAmPm = popover.find('.clockpicker-span-am-pm');
-		this.amOrPm = "PM";
+    this.amOrPm = "";
 		this.immediateUpdate = false;
 		
 		// Setup for for 12 hour clock if option is selected
@@ -466,10 +466,17 @@
 			];
 		}
 		this.hours = + value[0] || 0;
-		if(value[1].match(/AM|PM/)) value[1] = value[1].substr(0,2);
+    if(value[1].match(/AM|PM/)) {
+      this.amOrPm = value[1].match(/AM|PM/)[0]
+      value[1] = value[1].substr(0,2);
+    }
 		this.minutes = + value[1] || 0;
 		this.spanHours.html(leadingZero(this.hours));
 		this.spanMinutes.html(leadingZero(this.minutes));
+
+        if (this.options.twelvehour) {
+            this.spanAmPm.empty().append(this.amOrPm);
+        }
 
 		// Toggle to hours view
 		this.toggleView('hours');
